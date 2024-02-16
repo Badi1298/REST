@@ -1,4 +1,5 @@
 const express = require('express');
+const { body, validationResult } = require('express-validator');
 
 const shopController = require('../controllers/shop');
 
@@ -14,13 +15,32 @@ router.get('/items', (req, res) => {
     ]);
 });
 
-router.post('/post', (req, res) => {
-    const { title, content } = req.body;
+router.post(
+    '/item',
+    [
+        body('title')
+            .trim()
+            .isLength({ min: 5 })
+            .withMessage('Minimum 5 characters length.'),
+        body('description')
+            .trim()
+            .isLength({ min: 5 })
+            .withMessage('Minimum 5 characters length.'),
+    ],
+    (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res
+                .status(422)
+                .json({ message: 'Invalid data.', errors: errors.array() });
+        }
+        const { title, description } = req.body;
 
-    res.status(201).json({
-        message: 'Post created successfully!',
-        post: { id: new Date().toISOString(), title, content },
-    });
-});
+        res.status(201).json({
+            message: 'Item created successfully!',
+            item: { id: new Date().toISOString(), title, description },
+        });
+    }
+);
 
 module.exports = router;
