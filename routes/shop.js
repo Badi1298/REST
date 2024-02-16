@@ -1,14 +1,17 @@
 const express = require('express');
 
-const feedController = require('../controllers/feed');
+const shopController = require('../controllers/shop');
 
 const router = express.Router();
 
-// GET /feed/posts
-router.get('/posts', (req, res) => {
-    res.status(200).json({
-        posts: [{ title: 'First Post', content: 'This is the first post!' }],
-    });
+router.get('/items', (req, res) => {
+    res.status(200).json([
+        {
+            title: 'First Item',
+            description: 'This is the first item!',
+            imageUrl: 'image/interior.jpg',
+        },
+    ]);
 });
 
 router.post('/post', (req, res) => {
