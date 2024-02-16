@@ -3,6 +3,8 @@ const { body, validationResult } = require('express-validator');
 
 const shopController = require('../controllers/shop');
 
+const Item = require('../models/item');
+
 const router = express.Router();
 
 router.get('/items', (req, res) => {
@@ -34,12 +36,23 @@ router.post(
                 .status(422)
                 .json({ message: 'Invalid data.', errors: errors.array() });
         }
-        const { title, description } = req.body;
 
-        res.status(201).json({
-            message: 'Item created successfully!',
-            item: { id: new Date().toISOString(), title, description },
+        const { title, description, imageUrl, creator } = req.body;
+        const item = new Item({
+            title,
+            description,
+            imageUrl,
+            creator,
         });
+        item.save()
+            .then(item => {
+                console.log(item);
+                res.status(201).json({
+                    message: 'Item created successfully!',
+                    item,
+                });
+            })
+            .catch(err => console.log(err));
     }
 );
 

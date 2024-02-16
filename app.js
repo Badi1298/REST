@@ -1,7 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const shopRoutes = require('./routes/shop');
+
+const mongoURI =
+    'mongodb+srv://Badi:Noopgoogle123@cluster0.tgabpku.mongodb.net/eCommerce?retryWrites=true&w=majority';
 
 const app = express();
 
@@ -22,4 +26,7 @@ app.use((req, res, next) => {
 
 app.use('/shop', shopRoutes);
 
-app.listen(8080);
+mongoose
+    .connect(mongoURI)
+    .then(app.listen(8080))
+    .catch(err => console.log(err));
