@@ -37,7 +37,7 @@ exports.getItem = (req, res) => {
         });
 };
 
-exports.createItem = (req, res) => {
+exports.createItem = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const error = new Error('Invalid data.');
@@ -45,13 +45,21 @@ exports.createItem = (req, res) => {
         throw error;
     }
 
-    const { title, description, imageUrl, creator } = req.body;
+    if (!req.file) {
+        const error = new Error('No image provided');
+        error.statusCode = 422;
+        throw error;
+    }
+
+    const { title, description, creator } = req.body;
+    const image = req.file.path.replace('\\', '/');
     const item = new Item({
         title,
         description,
-        imageUrl,
+        image,
         creator,
     });
+
     item.save()
         .then(item => {
             res.status(201).json({
@@ -60,6 +68,7 @@ exports.createItem = (req, res) => {
             });
         })
         .catch(err => {
+            console.log(err);
             if (!err.statusCode) {
                 err.statusCode = 500;
             }
