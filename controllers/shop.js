@@ -1,7 +1,9 @@
+const fs = require('fs');
+
 const Item = require('../models/item');
 const { validationResult } = require('express-validator');
 
-exports.getItems = (req, res) => {
+exports.getItems = (req, res, next) => {
     Item.find()
         .then(items => {
             res.status(200).json({
@@ -17,8 +19,9 @@ exports.getItems = (req, res) => {
         });
 };
 
-exports.getItem = (req, res) => {
+exports.getItem = (req, res, next) => {
     const { itemId } = req.params;
+
     Item.findById(itemId)
         .then(item => {
             if (!item) {
@@ -76,7 +79,7 @@ exports.createItem = (req, res, next) => {
         });
 };
 
-exports.deleteItem = (req, res) => {
+exports.deleteItem = (req, res, next) => {
     const { itemId } = req.params;
 
     Item.findByIdAndDelete(itemId)
@@ -86,6 +89,10 @@ exports.deleteItem = (req, res) => {
                 error.statusCode = 404;
                 throw error;
             }
+
+            fs.unlink(item.image, err => {
+                if (err) throw err;
+            });
 
             res.status(200).json({
                 message: 'Successfully deleted the item.',
