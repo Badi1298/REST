@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 const Item = require('../models/item');
 const { validationResult } = require('express-validator');
@@ -79,6 +80,61 @@ exports.createItem = (req, res, next) => {
         });
 };
 
+exports.updateItem = (req, res, next) => {
+    const errors = validationResult(req);
+    const { itemId } = req.params;
+
+    if (!errors.isEmpty()) {
+        const error = new Error('Invalid data.');
+        error.statusCode = 422;
+        throw error;
+    }
+
+    const { title, description } = req.body;
+    let { image } = req.body;
+
+    if (req.file) {
+        image = req.file.path.replace('\\', '/');
+    }
+
+    if (!image) {
+        const error = new Error('No image provided.');
+        error.statusCode = 422;
+        throw error;
+    }
+
+    Item.findByIdAndUpdate(itemId)
+        .then(item => {
+            if (!item) {
+                const error = new Error('Could not find item.');
+                error.statusCode = 404;
+                throw error;
+            }
+
+            if (image !== item.image) {
+                clearImage(item.image);
+            }
+
+            item.title = title;
+            item.description = description;
+            item.image = image;
+
+            return item.save();
+        })
+        .then(result => {
+            return res.status(200).json({
+                message: 'Item updated successfully',
+                item: result,
+            });
+        })
+        .catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        });
+};
+
 exports.deleteItem = (req, res, next) => {
     const { itemId } = req.params;
 
@@ -90,9 +146,7 @@ exports.deleteItem = (req, res, next) => {
                 throw error;
             }
 
-            fs.unlink(item.image, err => {
-                if (err) throw err;
-            });
+            clearImage(item.image);
 
             res.status(200).json({
                 message: 'Successfully deleted the item.',
@@ -105,4 +159,11 @@ exports.deleteItem = (req, res, next) => {
             }
             next(err);
         });
+};
+
+const clearImage = filePath => {
+    const imagePath = path.join(__dirname, '..', filePath);
+    fs.unlink(imagePath, err => {
+        if (err) throw err;
+    });
 };

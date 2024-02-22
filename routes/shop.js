@@ -24,6 +24,21 @@ router.post(
     shopController.createItem
 );
 
+router.patch(
+    '/item/:itemId',
+    [
+        body('title')
+            .trim()
+            .isLength({ min: 5 })
+            .withMessage('Minimum 5 characters length.'),
+        body('description')
+            .trim()
+            .isLength({ min: 5 })
+            .withMessage('Minimum 5 characters length.'),
+    ],
+    shopController.updateItem
+);
+
 router.delete('/items/:itemId', shopController.deleteItem);
 
 module.exports = router;
