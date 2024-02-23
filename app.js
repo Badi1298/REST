@@ -8,6 +8,7 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 
 const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 
 const mongoURI =
     'mongodb+srv://Badi:Noopgoogle123@cluster0.tgabpku.mongodb.net/eCommerce?retryWrites=true&w=majority';
@@ -55,11 +56,13 @@ app.use((req, res, next) => {
 });
 
 app.use('/shop', shopRoutes);
+app.use('/auth', authRoutes);
 
 app.use((error, req, res, next) => {
     const status = error.statusCode || 500;
     const message = error.message;
-    res.status(status).json({ message });
+    const data = error.data;
+    res.status(status).json({ message, data });
 });
 
 mongoose

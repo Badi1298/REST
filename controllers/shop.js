@@ -5,11 +5,21 @@ const Item = require('../models/item');
 const { validationResult } = require('express-validator');
 
 exports.getItems = (req, res, next) => {
+    let totalItems;
+    const { skip, limit } = req.query;
+
     Item.find()
+        .countDocuments()
+        .then(count => {
+            totalItems = count;
+
+            return Item.find().skip(skip).limit(limit);
+        })
         .then(items => {
             res.status(200).json({
                 message: 'Fetched items successfully.',
                 items,
+                totalItems,
             });
         })
         .catch(err => {
@@ -141,7 +151,7 @@ exports.deleteItem = (req, res, next) => {
     Item.findByIdAndDelete(itemId)
         .then(item => {
             if (!item) {
-                const error = new Error();
+                const error = new Error('Could not find post.');
                 error.statusCode = 404;
                 throw error;
             }
