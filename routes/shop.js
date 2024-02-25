@@ -2,10 +2,11 @@ const express = require('express');
 const { body } = require('express-validator');
 
 const shopController = require('../controllers/shop');
+const isAuth = require('../middleware/is-auth');
 
 const router = express.Router();
 
-router.get('/items', shopController.getItems);
+router.get('/items', isAuth, shopController.getItems);
 
 router.get('/item/:itemId', shopController.getItem);
 
