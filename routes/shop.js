@@ -6,12 +6,13 @@ const isAuth = require('../middleware/is-auth');
 
 const router = express.Router();
 
-router.get('/items', isAuth, shopController.getItems);
+router.get('/items', shopController.getItems);
 
 router.get('/item/:itemId', shopController.getItem);
 
 router.post(
     '/item',
+    isAuth,
     [
         body('title')
             .trim()
@@ -27,6 +28,7 @@ router.post(
 
 router.patch(
     '/item/:itemId',
+    isAuth,
     [
         body('title')
             .trim()
@@ -40,6 +42,6 @@ router.patch(
     shopController.updateItem
 );
 
-router.delete('/items/:itemId', shopController.deleteItem);
+router.delete('/items/:itemId', isAuth, shopController.deleteItem);
 
 module.exports = router;
