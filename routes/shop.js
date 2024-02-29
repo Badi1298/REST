@@ -10,6 +10,8 @@ router.get('/items', shopController.getItems);
 
 router.get('/item/:itemId', shopController.getItem);
 
+router.get('/my-items', isAuth, shopController.getMyItems);
+
 router.post(
     '/item',
     isAuth,
