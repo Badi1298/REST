@@ -1,14 +1,15 @@
 const path = require('path');
 
+const schema = require('./graphql/schema');
+const root = require('./graphql/resolvers');
+const { createHandler } = require('graphql-http/lib/use/http');
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
-
-const shopRoutes = require('./routes/shop');
-const authRoutes = require('./routes/auth');
 
 const mongoURI =
     'mongodb+srv://Badi:Noopgoogle123@cluster0.tgabpku.mongodb.net/eCommerce?retryWrites=true&w=majority';
@@ -55,8 +56,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/shop', shopRoutes);
-app.use('/auth', authRoutes);
+app.all('/graphql', createHandler({ schema: schema, rootValue: root }));
 
 app.use((error, req, res, next) => {
     const status = error.statusCode || 500;
@@ -68,15 +68,6 @@ app.use((error, req, res, next) => {
 mongoose
     .connect(mongoURI)
     .then(result => {
-        const server = app.listen(8080);
-        const io = require('./socket').init(server, {
-            cors: {
-                origin: '*',
-                methods: ['GET', 'POST'],
-            },
-        });
-        io.on('connection', socket => {
-            console.log('client connected');
-        });
+        app.listen(8080);
     })
     .catch(err => console.log(err));
