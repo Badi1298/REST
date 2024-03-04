@@ -1,8 +1,7 @@
 const path = require('path');
 
-const schema = require('./graphql/schema');
-const root = require('./graphql/resolvers');
-const { createHandler } = require('graphql-http/lib/use/http');
+const { buildSchema } = require('graphql');
+const { createHandler } = require('graphql-http/lib/use/express');
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -14,7 +13,30 @@ const { v4: uuidv4 } = require('uuid');
 const mongoURI =
     'mongodb+srv://Badi:Noopgoogle123@cluster0.tgabpku.mongodb.net/eCommerce?retryWrites=true&w=majority';
 
+// Construct a schema, using GraphQL schema language
+const schema = buildSchema(`
+    type Query {
+      hello: String
+    }
+`);
+
+// The root provides a resolver function for each API endpoint
+const root = {
+    hello: () => {
+        return 'Hello world!';
+    },
+};
+
 const app = express();
+
+// Create and use the GraphQL handler.
+app.all(
+    '/graphql',
+    createHandler({
+        schema: schema,
+        rootValue: root,
+    })
+);
 
 const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -55,8 +77,6 @@ app.use((req, res, next) => {
     );
     next();
 });
-
-app.all('/graphql', createHandler({ schema: schema, rootValue: root }));
 
 app.use((error, req, res, next) => {
     const status = error.statusCode || 500;

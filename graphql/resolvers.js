@@ -1,8 +1,6 @@
 // The root provides a resolver function for each API endpoint
-const root = {
+module.exports = {
     hello: () => {
         return 'Hello world!';
     },
 };
-
-module.exports = root;
