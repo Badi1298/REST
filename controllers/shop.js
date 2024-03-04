@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const io = require('../socket');
+
 const Item = require('../models/item');
 const User = require('../models/user');
 
@@ -98,6 +100,8 @@ exports.createItem = (req, res, next) => {
             return user.save();
         })
         .then(result => {
+            io.getIo().emit('items', { action: 'create', item });
+
             res.status(201).json({
                 message: 'Item created successfully!',
                 item,
@@ -163,6 +167,8 @@ exports.updateItem = (req, res, next) => {
             return item.save();
         })
         .then(result => {
+            io.getIo().emit('items', { action: 'update', item: result });
+
             return res.status(200).json({
                 message: 'Item updated successfully',
                 item: result,
